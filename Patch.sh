@@ -2,7 +2,7 @@
 
 # This program is licensed under the terms of the MIT License.
 #
-# Copyright 2017-2024 Munehiro Yamamoto <munepixyz@gmail.com>
+# Copyright 2017-2026 Munehiro Yamamoto <munepixyz@gmail.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -161,7 +161,7 @@ lnsysfnt(){
             ln -s "/System/Library/Fonts/ヒラギノ角ゴシック W7.ttc" HiraginoSans-W7.ttc
             ln -s "/System/Library/Fonts/ヒラギノ角ゴシック W9.ttc" HiraginoSans-W9.ttc
             ;;
-        10.1[3-6]|1[1-9].[0-9])
+        10.1[3-6]|[1-9][0-9].*)
             ## bundled Hiragino OpenType fonts/collections (OS X 10.13 High Sierra)
             ln -s "/System/Library/Fonts/ヒラギノ明朝 ProN.ttc"     HiraginoSerif.ttc
             ln -s "/System/Library/Fonts/ヒラギノ丸ゴ ProN W4.ttc"  HiraginoSansR-W4.ttc
@@ -199,7 +199,7 @@ cjkgsintg(){
             cjkgsExtDB=elcapitan;;
         10.12)
             cjkgsExtDB=sierra;;
-        10.1[3-6]|1[1-9].[0-9])
+        10.1[3-6]|[1-9][0-9].*)
             cjkgsExtDB=highsierra;;
         *)
             echo E: not supported: ${OSXVERSION}
@@ -242,7 +242,7 @@ case ${OSXVERSION} in
         kanjiEmbed=hiragino-pron;;
     10.1[12])
         kanjiEmbed=hiragino-elcapitan-pron;;
-    10.1[3-6]|1[1-9].[0-9])
+    10.1[3-6]|[1-9][0-9].*)
         kanjiEmbed=hiragino-highsierra-pron;;
     *)
         echo E: not supported: ${OSXVERSION}

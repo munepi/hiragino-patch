@@ -19,4 +19,7 @@ Icon
 test/hiraprop.tar.xz
 test/install-tl-unx.tar.gz
 
+Work/
+*.dmg
+
 extras/

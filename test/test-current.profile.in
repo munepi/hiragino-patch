@@ -1,0 +1,41 @@
+# texlive.profile for hiragino-patch test
+# ====================
+#
+# Self-contained (portable) installation of TeX Live (current).
+# All paths are under @@TESTTEMP@@ so nothing escapes to ~/Library/.
+# collection-langjapanese will be added via tlmgr after installation.
+#
+## set TeX directory structure (self-contained)
+TEXDIR @@TESTTEMP@@/texlive
+TEXMFLOCAL @@TESTTEMP@@/texlive/texmf-local
+TEXMFHOME @@TESTTEMP@@/texlive/texmf-local
+TEXMFSYSCONFIG @@TESTTEMP@@/texlive/texmf-config
+TEXMFSYSVAR @@TESTTEMP@@/texlive/texmf-var
+TEXMFCONFIG @@TESTTEMP@@/texlive/texmf-config
+TEXMFVAR @@TESTTEMP@@/texlive/texmf-var
+#
+## set target platforms
+binary_universal-darwin 1
+#
+## set installation scheme and custom categories
+selected_scheme scheme-basic
+#
+## set other variables
+in_place 0
+option_adjustrepo 0
+option_autobackup 0
+option_backupdir tlpkg/backups
+option_desktop_integration 0
+option_doc 0
+option_file_assocs 0
+option_fmt 1
+option_letter 0
+option_menu_integration 0
+option_path 0
+option_post_code 1
+option_src 0
+option_sys_bin /usr/local/bin
+option_sys_info /usr/local/share/info
+option_sys_man /usr/local/share/man
+option_write18_restricted 1
+portable 1
