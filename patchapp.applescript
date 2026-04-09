@@ -2,7 +2,7 @@
 
 # This program is licensed under the terms of the MIT License.
 #
-# Copyright 2017-2024 Munehiro Yamamoto <munepixyz@gmail.com>
+# Copyright 2017-2026 Munehiro Yamamoto <munepixyz@gmail.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -22,71 +22,67 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
--- 700 lines /tmp/bibunsho7-patch.log => 3.5min
-set progressTimeout to 5 -- minutes
-set progressMaxN to (progressTimeout * 60 * 10)
-set progress total steps to progressMaxN
-set progress description to "Patch.app: 実行中..."
-set progress additional description to "待機中..."
+set patchLog to "/tmp/hiragino-patch.log"
+set pollInterval to 0.5 -- seconds
+set timeoutSeconds to 600 -- 10 minutes
 
-set patchLog to "/tmp/bibunsho7-patch.log"
+set progress total steps to -1
+set progress description to "Patch.app: 実行中..."
+set progress additional description to "準備中..."
 
 try
-    -- execute shell script on background
-    do shell script quoted form of (POSIX path of (path to resource "Patch.sh")) & ¬
-        space & "&>" & patchLog & space & "&" with administrator privileges
+    -- check if TLPATH file exists in Resources (test/portable mode)
+    set patchSh to quoted form of (POSIX path of (path to resource "Patch.sh"))
+    set useAdminPrivileges to true
+    try
+        set tlpathFile to POSIX path of (path to resource "TLPATH")
+        set tlpathValue to do shell script "cat " & quoted form of tlpathFile & " | tr -d '\\n'"
+        set useAdminPrivileges to false
+    end try
 
-    -- activate the progress bar intentionally
+    -- execute shell script in background
+    if useAdminPrivileges then
+        do shell script patchSh & ¬
+            space & "&>" & patchLog & space & "&" with administrator privileges
+    else
+        do shell script "export TLPATH=" & quoted form of tlpathValue & "; " & patchSh & ¬
+            space & "&>" & patchLog & space & "&"
+    end if
+
+    -- activate the progress bar
     activate
 
-    repeat with i from 1 to progressMaxN
-        delay 0.1
-        -- update progress description and completed steps
-        set progrMsg to do shell script "tail -n 1" & space & patchLog & space & "| fold"
-        set progress additional description to progrMsg
-        set i to do shell script "wc -l" & space & patchLog & space & "| sed \"s, *,,\" | cut -f1 -d \" \""
+    -- poll log file until Patch.sh finishes
+    set maxIterations to timeoutSeconds / pollInterval
+    repeat with i from 1 to maxIterations
+        delay pollInterval
 
-        set progress completed steps to (i * progressTimeout)
+        -- read the last line of the log
+        set lastLine to do shell script "tail -n 1 " & patchLog & " 2>/dev/null || echo ''"
+        set progress additional description to lastLine
 
-        if progrMsg = "cjk-gs-integrate [DEBUG]: overwriting with the new one ..."
-            set progress description to "Patch.app: 実行中... (この処理にしばらく時間がかかる場合があります)"
-        else
-            set progress description to "Patch.app: 実行中..."
-        end if
-
-        --
-        if progrMsg = "+ exit 0" then
-            exit repeat
-        else if progrMsg = "+ exit 1" then
+        -- check for completion
+        if lastLine = "+ exit 0" then
+            -- success
+            set progress additional description to "完了"
+            activate
+            display alert "完了"
+            return
+        else if lastLine = "+ exit 1" then
+            -- Patch.sh reported failure
             error number -128
         end if
     end repeat
-    -- some exception handling
-    if progrMsg = "+ exit 0" then
-    else if progrMsg = "cp: /Volumes/Bibunsho7-patch/ptex-fontmaps/maps/hiragino*: No such file or directory"
-        error number -2
-    else
-        error number -128
-    end if
 
-    -- quit
-    set progress completed steps to progressMaxN
-    set progress additional description to "完了"
+    -- timeout
+    error number -128
+
+on error errMsg number errn
     activate
-    display alert "完了"
-    return
-
-on error message number errn
-    set progress additional description to progrMsg
-    activate
-
-    set plzChkLog to "失敗：ログファイル" & space & patchLog & space & "をご確認ください。"
-
-    if errn = -2 then
-        display alert plzChkLog & "複数個の Bibunsho7-patch-<バージョン>.dmg を開いています。"
-    else
-        set progrMsg to do shell script "tail -n 2" & space & patchLog & space & "| fold"
-        set progress additional description to progrMsg
-        display alert plzChkLog
-    end if
+    set plzChkLog to "失敗：ログファイル " & patchLog & " をご確認ください。"
+    try
+        set lastLines to do shell script "tail -n 3 " & patchLog & " 2>/dev/null || echo '(ログなし)'"
+        set progress additional description to lastLines
+    end try
+    display alert plzChkLog
 end try
