@@ -44,8 +44,8 @@ Happy TeXing!
 ## コマンドラインに慣れている方
 
 ``` shell
-$ git clone --recursive https://github.com/munepi/bibunsho7-patch.git
-$ cd bibunsho7-patch/
+$ git clone --recursive https://github.com/munepi/hiragino-patch.git
+$ cd hiragino-patch/
 
 （必要に応じて、該当バージョンをcheckout： git checkout vX.Y）
 
